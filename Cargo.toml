@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 tokio-postgres = "0.7.6"
 actix-web = "4"
+tokio = { version = "1.20.1", features = ["full"] }
