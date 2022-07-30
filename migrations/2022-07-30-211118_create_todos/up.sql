@@ -1,10 +1,4 @@
--- Project Name : learn-actix
--- Date/Time    : 2022/07/30 20:38:17
--- Author       : tonod
--- RDBMS Type   : PostgreSQL
--- Application  : A5:SQL Mk-2
-
-
+-- Your SQL goes here
 create table todos (
   id serial not null
   , title character varying(255) not null
