@@ -6,6 +6,13 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[derive(Deserialize)]
+pub struct TodoRequest {
+    pub title: String,
+    pub memo: Option<String>,
+    pub done: bool,
+}
+
 #[derive(Identifiable, Queryable, Serialize, Deserialize, Debug, Clone, Associations)]
 #[table_name = "todos"]
 pub struct Todo {
@@ -19,14 +26,14 @@ pub struct Todo {
 
 #[derive(Insertable, Debug)]
 #[table_name = "todos"]
-pub struct NewTodo<'a> {
-    pub title: &'a str,
-    pub memo: Option<&'a str>,
+pub struct NewTodo {
+    pub title: String,
+    pub memo: Option<String>,
     pub done: bool,
 }
 
 impl Todo {
-    pub fn insert<'a>(todo: NewTodo) -> Result<i32, Error> {
+    pub fn insert(todo: NewTodo) -> Result<i32, Error> {
         let url = utils::EnvFile::database_url()?;
         let conn = connection::get_connection(url)?;
         let result = diesel::insert_into(todos::table)
@@ -47,8 +54,8 @@ mod test {
     #[test]
     fn データの登録ができる() {
         let new_todo = NewTodo {
-            title: "title",
-            memo: Some("memo"),
+            title: "title".to_string(),
+            memo: Some("memo".to_string()),
             done: false,
         };
         assert!(Todo::insert(new_todo).is_ok());
@@ -56,8 +63,8 @@ mod test {
     #[test]
     fn データの登録に失敗した場合はエラーを出力する() {
         let new_todo = NewTodo {
-            title: &"aaaaaaaaaa".to_string().repeat(26), // 255文字までで260字登録しようとしてエラー
-            memo: Some("memo"),
+            title: "aaaaaaaaaa".to_string().repeat(26), // 255文字までで260字登録しようとしてエラー
+            memo: Some("memo".to_string()),
             done: false,
         };
         let res = Todo::insert(new_todo);

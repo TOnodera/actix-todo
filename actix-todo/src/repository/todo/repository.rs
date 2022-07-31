@@ -6,7 +6,7 @@ use crate::error::types::Error;
 use crate::repository::diesel::connection as diesel_connection;
 use crate::utils;
 
-use super::model::{NewTodo, Todo};
+use crate::model::todo::{NewTodo, Todo};
 pub struct TodoRepository {
     connection: PgConnection,
 }

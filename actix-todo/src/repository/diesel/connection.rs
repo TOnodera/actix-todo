@@ -1,4 +1,4 @@
-use diesel::{pg::PgConnection, Connection, ConnectionResult};
+use diesel::{pg::PgConnection, Connection};
 
 use crate::error::types::Error;
 
@@ -7,7 +7,7 @@ pub fn get_connection(database_url: String) -> Result<PgConnection, Error> {
     match result {
         Ok(connection) => Ok(connection),
         Err(_) => Err(Error::ConnectionError(
-            ("データベースに接続失敗しました。接続情報を確認してください。".to_string()),
+            "データベースに接続失敗しました。接続情報を確認してください。".to_string(),
         )),
     }
 }
