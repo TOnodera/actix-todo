@@ -4,7 +4,9 @@ use actix_web::{App, HttpServer};
 
 mod api;
 mod config;
+mod error;
 mod repository;
+mod utils;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
