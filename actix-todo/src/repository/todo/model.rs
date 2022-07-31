@@ -6,7 +6,7 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 
-#[derive(Identifiable, Queryable, Serialize, Debug, Clone, Associations)]
+#[derive(Identifiable, Queryable, Serialize, Deserialize, Debug, Clone, Associations)]
 #[table_name = "todos"]
 pub struct Todo {
     pub id: i32,
@@ -52,5 +52,23 @@ mod test {
             done: false,
         };
         assert!(Todo::insert(new_todo).is_ok());
+    }
+    #[test]
+    fn データの登録に失敗した場合はエラーを出力する() {
+        let new_todo = NewTodo {
+            title: &"aaaaaaaaaa".to_string().repeat(26), // 255文字までで260字登録しようとしてエラー
+            memo: Some("memo"),
+            done: false,
+        };
+        let res = Todo::insert(new_todo);
+        assert!(res.is_err());
+        res.err().and_then(|e| {
+            Some({
+                assert_eq!(
+                    e.to_string(),
+                    "DatabaseRuntime Error: データの登録に失敗しました。"
+                );
+            })
+        });
     }
 }
