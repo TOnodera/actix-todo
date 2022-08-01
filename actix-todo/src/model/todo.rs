@@ -1,7 +1,5 @@
 use crate::error::types::Error;
-use crate::repository::diesel::connection;
 use crate::repository::diesel::schema::todos;
-use crate::utils;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -33,12 +31,10 @@ pub struct NewTodo {
 }
 
 impl Todo {
-    pub fn insert(todo: NewTodo) -> Result<i32, Error> {
-        let url = utils::EnvFile::database_url()?;
-        let conn = connection::get_connection(url)?;
+    pub fn insert(conn: &PgConnection, todo: NewTodo) -> Result<i32, Error> {
         let result = diesel::insert_into(todos::table)
             .values(&todo)
-            .get_result::<Todo>(&conn) as QueryResult<Todo>;
+            .get_result::<Todo>(conn) as QueryResult<Todo>;
         match result {
             Ok(row) => Ok(row.id),
             Err(_) => Err(Error::DatabaseRuntimeError(
@@ -46,10 +42,24 @@ impl Todo {
             )),
         }
     }
+
+    pub fn gets(conn: &PgConnection) -> Result<Vec<Todo>, Error> {
+        use crate::repository::diesel::schema::todos::dsl::*;
+
+        let results = todos.limit(5).load::<Todo>(conn);
+        match results {
+            Ok(rows) => Ok(rows),
+            Err(e) => Err(Error::DatabaseRuntimeError(
+                format!("Todoテーブルのデータの取得に失敗しました。: {}", e).to_string(),
+            )),
+        }
+    }
 }
 
 #[cfg(test)]
 mod test {
+    use crate::{api::todo::gets, repository, utils};
+
     use super::*;
     #[test]
     fn データの登録ができる() {
@@ -58,7 +68,9 @@ mod test {
             memo: Some("memo".to_string()),
             done: false,
         };
-        assert!(Todo::insert(new_todo).is_ok());
+        let url = utils::EnvFile::database_url().unwrap();
+        let conn = repository::diesel::connection::get_connection(url).unwrap();
+        assert!(Todo::insert(&conn, new_todo).is_ok());
     }
     #[test]
     fn データの登録に失敗した場合はエラーを出力する() {
@@ -67,7 +79,9 @@ mod test {
             memo: Some("memo".to_string()),
             done: false,
         };
-        let res = Todo::insert(new_todo);
+        let url = utils::EnvFile::database_url().unwrap();
+        let conn = repository::diesel::connection::get_connection(url).unwrap();
+        let res = Todo::insert(&conn, new_todo);
         assert!(res.is_err());
         res.err().and_then(|e| {
             Some({
@@ -77,5 +91,19 @@ mod test {
                 );
             })
         });
+    }
+
+    #[test]
+    fn データを取得できる() {
+        let url = utils::EnvFile::database_url().unwrap();
+        let conn = repository::diesel::connection::get_connection(url).unwrap();
+
+        let results = Todo::gets(&conn);
+        match results {
+            Ok(rows) => {
+                println!("{:#?}", rows);
+            }
+            Err(_) => {}
+        }
     }
 }

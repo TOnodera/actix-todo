@@ -25,6 +25,6 @@ impl TodoRepository {
         TodoRepository { connection }
     }
     pub fn insert(&self, todo: NewTodo) -> Result<i32, Error> {
-        Todo::insert(todo)
+        Todo::insert(&self.connection, todo)
     }
 }
