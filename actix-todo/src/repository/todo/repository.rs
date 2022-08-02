@@ -27,4 +27,7 @@ impl TodoRepository {
     pub fn insert(&self, todo: NewTodo) -> Result<i32, Error> {
         Todo::insert(&self.connection, todo)
     }
+    pub fn gets(&self) -> Result<Vec<Todo>, Error> {
+        Todo::gets(&self.connection)
+    }
 }

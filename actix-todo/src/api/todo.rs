@@ -1,11 +1,16 @@
 use crate::model::todo::{NewTodo, TodoRequest};
 use crate::repository::todo::repository::TodoRepository;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{error, get, post, web, Error, HttpResponse, Responder};
 use serde_json::json;
 
 #[get("/todos")]
-pub async fn gets() -> impl Responder {
-    HttpResponse::Ok().body("hello")
+pub async fn gets() -> Result<HttpResponse, Error> {
+    let repository = TodoRepository::new();
+    let result = repository.gets();
+    match result {
+        Ok(todos) => Ok(HttpResponse::Ok().json(todos)),
+        Err(e) => Err(error::ErrorBadRequest(e)),
+    }
 }
 
 #[post("/todos")]

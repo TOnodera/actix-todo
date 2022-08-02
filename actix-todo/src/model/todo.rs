@@ -44,9 +44,9 @@ impl Todo {
     }
 
     pub fn gets(conn: &PgConnection) -> Result<Vec<Todo>, Error> {
-        use crate::repository::diesel::schema::todos::dsl::*;
+        use crate::repository::diesel::schema::todos::dsl;
 
-        let results = todos.limit(5).load::<Todo>(conn);
+        let results = dsl::todos.limit(5).load::<Todo>(conn);
         match results {
             Ok(rows) => Ok(rows),
             Err(e) => Err(Error::DatabaseRuntimeError(
@@ -58,7 +58,7 @@ impl Todo {
 
 #[cfg(test)]
 mod test {
-    use crate::{api::todo::gets, repository, utils};
+    use crate::{repository, utils};
 
     use super::*;
     #[test]
@@ -101,7 +101,7 @@ mod test {
         let results = Todo::gets(&conn);
         match results {
             Ok(rows) => {
-                println!("{:#?}", rows);
+                assert!(rows.len() > 0);
             }
             Err(_) => {}
         }
