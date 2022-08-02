@@ -6,9 +6,20 @@ use serde_json::json;
 #[get("/todos")]
 pub async fn gets() -> Result<HttpResponse, Error> {
     let repository = TodoRepository::new();
-    let result = repository.gets();
+    let result = repository.gets(0, 10);
     match result {
         Ok(todos) => Ok(HttpResponse::Ok().json(todos)),
+        Err(e) => Err(error::ErrorBadRequest(e)),
+    }
+}
+
+#[get("/todos/{id}")]
+pub async fn get(path: web::Path<i32>) -> Result<HttpResponse, Error> {
+    let id = path.into_inner();
+    let repository = TodoRepository::new();
+    let result = repository.get(id);
+    match result {
+        Ok(todo) => Ok(HttpResponse::Ok().json(todo)),
         Err(e) => Err(error::ErrorBadRequest(e)),
     }
 }

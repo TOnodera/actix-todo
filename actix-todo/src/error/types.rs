@@ -5,6 +5,7 @@ pub enum Error {
     ConnectionError(String),
     DatabaseRuntimeError(String),
     VarError(String),
+    NotFoundError(String),
 }
 
 impl Display for Error {
@@ -18,6 +19,9 @@ impl Display for Error {
             }
             Error::VarError(e) => {
                 write!(f, "VarError: {}", e)
+            }
+            Error::NotFoundError(e) => {
+                write!(f, "NotFoundError: {}", e)
             }
         }
     }
