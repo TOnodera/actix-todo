@@ -6,7 +6,7 @@ use crate::error::types::Error;
 use crate::repository::diesel::connection as diesel_connection;
 use crate::utils;
 
-use crate::model::todo::{NewTodo, Todo};
+use crate::model::todo::{NewTodo, Todo, UpdateTodoRequest};
 pub struct TodoRepository {
     connection: PgConnection,
 }
@@ -32,5 +32,8 @@ impl TodoRepository {
     }
     pub fn get(&self, id: i32) -> Result<Todo, Error> {
         Todo::get(&self.connection, id)
+    }
+    pub fn update(&self, request: UpdateTodoRequest) -> Result<(), Error> {
+        Todo::update(&self.connection, request)
     }
 }

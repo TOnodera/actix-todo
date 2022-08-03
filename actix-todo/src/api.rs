@@ -5,5 +5,6 @@ pub mod todo;
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(todo::gets)
         .service(todo::post)
-        .service(todo::get);
+        .service(todo::get)
+        .service(todo::put);
 }

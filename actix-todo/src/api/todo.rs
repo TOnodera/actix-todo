@@ -1,6 +1,6 @@
-use crate::model::todo::{NewTodo, TodoRequest};
+use crate::model::todo::{CreateTodoRequest, NewTodo, UpdateTodoRequest};
 use crate::repository::todo::repository::TodoRepository;
-use actix_web::{error, get, post, web, Error, HttpResponse, Responder};
+use actix_web::{error, get, post, put, web, Error, HttpResponse};
 use serde_json::json;
 
 #[get("/todos")]
@@ -25,7 +25,7 @@ pub async fn get(path: web::Path<i32>) -> Result<HttpResponse, Error> {
 }
 
 #[post("/todos")]
-pub async fn post(todo_request: web::Json<TodoRequest>) -> impl Responder {
+pub async fn post(todo_request: web::Json<CreateTodoRequest>) -> Result<HttpResponse, Error> {
     let repository = TodoRepository::new();
     let result = repository.insert(NewTodo {
         title: todo_request.title.clone(),
@@ -33,7 +33,22 @@ pub async fn post(todo_request: web::Json<TodoRequest>) -> impl Responder {
         done: todo_request.done,
     });
     match result {
-        Ok(id) => HttpResponse::Created().json(json!({ "id": id })),
-        Err(e) => HttpResponse::BadRequest().json(json!({ "message": e.to_string()})),
+        Ok(id) => Ok(HttpResponse::Created().json(json!({ "id": id }))),
+        Err(e) => Err(error::ErrorBadRequest(e)),
+    }
+}
+
+#[put("/todos")]
+pub async fn put(todo_request: web::Json<UpdateTodoRequest>) -> Result<HttpResponse, Error> {
+    let repository = TodoRepository::new();
+    let result = repository.update(UpdateTodoRequest {
+        id: todo_request.id,
+        title: todo_request.title.clone(),
+        memo: todo_request.memo.clone(),
+        done: todo_request.done,
+    });
+    match result {
+        Ok(_) => Ok(HttpResponse::Ok().json(json![""])),
+        Err(e) => Err(error::ErrorBadRequest(e)),
     }
 }

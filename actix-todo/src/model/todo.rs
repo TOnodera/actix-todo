@@ -2,11 +2,19 @@ use crate::error::types::Error;
 use crate::repository::diesel::schema::todos;
 use actix_web::HttpResponse;
 use chrono::NaiveDateTime;
-use diesel::prelude::*;
+use diesel::{associations::HasTable, prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
-pub struct TodoRequest {
+pub struct CreateTodoRequest {
+    pub title: String,
+    pub memo: Option<String>,
+    pub done: bool,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct UpdateTodoRequest {
+    pub id: i32,
     pub title: String,
     pub memo: Option<String>,
     pub done: bool,
@@ -55,6 +63,7 @@ impl Todo {
             )),
         }
     }
+
     pub fn get(conn: &PgConnection, id: i32) -> Result<Todo, Error> {
         use crate::repository::diesel::schema::todos::dsl;
 
@@ -79,6 +88,34 @@ impl Todo {
             }
         };
         Ok(row)
+    }
+
+    pub fn update(conn: &PgConnection, request: UpdateTodoRequest) -> Result<(), Error> {
+        use crate::repository::diesel::schema::todos::dsl;
+        let result = dsl::todos
+            .filter(dsl::id.eq(request.id))
+            .first::<Todo>(conn);
+        let registered = match result {
+            Ok(todo) => todo,
+            Err(_) => {
+                return Err(Error::DatabaseRuntimeError(
+                    "更新に失敗しました。".to_string(),
+                ));
+            }
+        };
+        let result = diesel::update(&registered)
+            .set((
+                dsl::title.eq(request.title),
+                dsl::memo.eq(request.memo),
+                dsl::done.eq(request.done),
+            ))
+            .get_result::<Todo>(conn);
+        match result {
+            Ok(_) => Ok(()),
+            Err(_) => Err(Error::DatabaseRuntimeError(
+                "更新に失敗しました。".to_string(),
+            )),
+        }
     }
 }
 
