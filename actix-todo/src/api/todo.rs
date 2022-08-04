@@ -1,6 +1,6 @@
-use crate::model::todo::{CreateTodoRequest, NewTodo, UpdateTodoRequest};
+use crate::model::todo::{CreateTodoRequest, DeleteRequest, NewTodo, UpdateTodoRequest};
 use crate::repository::todo::repository::TodoRepository;
-use actix_web::{error, get, post, put, web, Error, HttpResponse};
+use actix_web::{delete, error, get, post, put, web, Error, HttpResponse};
 use serde_json::json;
 
 #[get("/todos")]
@@ -48,7 +48,17 @@ pub async fn put(todo_request: web::Json<UpdateTodoRequest>) -> Result<HttpRespo
         done: todo_request.done,
     });
     match result {
-        Ok(_) => Ok(HttpResponse::Ok().json(json![""])),
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
+        Err(e) => Err(error::ErrorBadRequest(e)),
+    }
+}
+
+#[delete("/todos")]
+pub async fn delete(request: web::Json<DeleteRequest>) -> Result<HttpResponse, Error> {
+    let repository = TodoRepository::new();
+    let result = repository.delete(request.id);
+    match result {
+        Ok(_) => Ok(HttpResponse::Ok().finish()),
         Err(e) => Err(error::ErrorBadRequest(e)),
     }
 }

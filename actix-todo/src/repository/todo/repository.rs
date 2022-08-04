@@ -36,4 +36,7 @@ impl TodoRepository {
     pub fn update(&self, request: UpdateTodoRequest) -> Result<(), Error> {
         Todo::update(&self.connection, request)
     }
+    pub fn delete(&self, id: i32) -> Result<(), Error> {
+        Todo::delete(&self.connection, id)
+    }
 }

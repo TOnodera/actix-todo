@@ -6,6 +6,11 @@ use diesel::{associations::HasTable, prelude::*};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
+pub struct DeleteRequest {
+    pub id: i32,
+}
+
+#[derive(Deserialize)]
 pub struct CreateTodoRequest {
     pub title: String,
     pub memo: Option<String>,
@@ -115,6 +120,15 @@ impl Todo {
             Err(_) => Err(Error::DatabaseRuntimeError(
                 "更新に失敗しました。".to_string(),
             )),
+        }
+    }
+
+    pub fn delete(conn: &PgConnection, id: i32) -> Result<(), Error> {
+        use crate::repository::diesel::schema::todos::dsl;
+        let result = diesel::delete(dsl::todos.filter(dsl::id.eq(id))).execute(conn);
+        match result {
+            Ok(_) => Ok(()),
+            Err(e) => Err(Error::DatabaseRuntimeError(e.to_string())),
         }
     }
 }
