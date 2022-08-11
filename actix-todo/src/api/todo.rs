@@ -11,6 +11,7 @@ pub async fn post(todo_request: web::Json<CreateTodoRequest>) -> Result<HttpResp
         memo: todo_request.memo.clone(),
         done: todo_request.done,
     });
+
     match result {
         Ok(id) => Ok(HttpResponse::Created().json(json!({ "id": id }))),
         Err(e) => Err(error::ErrorBadRequest(e)),
