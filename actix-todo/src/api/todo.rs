@@ -1,20 +1,20 @@
-use crate::model::todo::{CreateTodoRequest, NewTodo};
 use crate::repository::diesel::connection::Pool;
 use crate::repository::todo::repository::TodoRepository;
+use crate::{api::model::request::todo::Create, model::todo::NewTodo};
 use actix_web::{error, post, web, Error, HttpResponse};
 use serde_json::json;
 
 #[post("/todos")]
 pub async fn post(
-    todo_request: web::Json<CreateTodoRequest>,
+    request: web::Json<Create>,
     state: web::Data<Pool>,
 ) -> Result<HttpResponse, Error> {
     let conn = state.get().unwrap();
     let repository = TodoRepository::new(conn);
     let result = repository.insert(NewTodo {
-        title: todo_request.title.clone(),
-        memo: todo_request.memo.clone(),
-        done: todo_request.done,
+        title: request.title.clone(),
+        memo: request.memo.clone(),
+        done: request.done,
     });
 
     match result {

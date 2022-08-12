@@ -1,17 +1,10 @@
+use crate::error::types::Error;
 use crate::repository::diesel::schema::todos;
-use crate::{error::types::Error, repository::diesel::connection::Pool};
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use r2d2::PooledConnection;
 use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize)]
-pub struct CreateTodoRequest {
-    pub title: String,
-    pub memo: Option<String>,
-    pub done: bool,
-}
 
 #[derive(Identifiable, Queryable, Serialize, Deserialize, Debug, Clone, Associations)]
 #[table_name = "todos"]
