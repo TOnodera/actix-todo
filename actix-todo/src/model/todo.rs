@@ -1,7 +1,9 @@
-use crate::error::types::Error;
 use crate::repository::diesel::schema::todos;
+use crate::{error::types::Error, repository::diesel::connection::Pool};
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
+use diesel::r2d2::ConnectionManager;
+use r2d2::PooledConnection;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]
@@ -31,7 +33,10 @@ pub struct NewTodo {
 }
 
 impl Todo {
-    pub fn insert(conn: &PgConnection, todo: NewTodo) -> Result<i32, Error> {
+    pub fn insert(
+        conn: &PooledConnection<ConnectionManager<PgConnection>>,
+        todo: NewTodo,
+    ) -> Result<i32, Error> {
         let result = diesel::insert_into(todos::table)
             .values(&todo)
             .get_result::<Todo>(conn) as QueryResult<Todo>;

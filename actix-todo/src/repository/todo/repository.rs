@@ -1,27 +1,20 @@
 use core::panic;
 
+use diesel::r2d2::ConnectionManager;
 use diesel::PgConnection;
+use r2d2::{ManageConnection, PooledConnection};
 
 use crate::error::types::Error;
-use crate::repository::diesel::connection as diesel_connection;
+use crate::repository::diesel::connection::{self as diesel_connection, Pool};
 use crate::utils;
 
 use crate::model::todo::{NewTodo, Todo};
 pub struct TodoRepository {
-    connection: PgConnection,
+    connection: PooledConnection<ConnectionManager<PgConnection>>,
 }
 
 impl TodoRepository {
-    pub fn new() -> Self {
-        let result = match utils::EnvFile::database_url() {
-            Ok(url) => diesel_connection::get_connection(url),
-            Err(e) => panic!("{}", e),
-        };
-        let connection = match result {
-            Ok(connection) => connection,
-            Err(e) => panic!("{}", e),
-        };
-
+    pub fn new(connection: PooledConnection<ConnectionManager<PgConnection>>) -> Self {
         TodoRepository { connection }
     }
     pub fn insert(&self, todo: NewTodo) -> Result<i32, Error> {
