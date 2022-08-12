@@ -3,6 +3,7 @@ extern crate diesel;
 use actix_web::{App, HttpServer};
 
 mod api;
+mod application;
 mod config;
 mod domain;
 mod error;
