@@ -22,8 +22,7 @@ pub async fn post(
         },
     );
 
-    match result {
-        Ok(id) => Ok(HttpResponse::Created().json(json!({ "id": id }))),
-        Err(e) => Err(error::ErrorBadRequest(e)),
-    }
+    result
+        .map(|id| HttpResponse::Created().json(json!({ "id": id })))
+        .map_err(|e| error::ErrorBadRequest(e))
 }
