@@ -1,8 +1,10 @@
 use chrono::NaiveDateTime;
 
-use crate::error::types::Error;
+use crate::{error::types::Error, repository::model::todo::RepositoryForCreate};
 
-pub struct Todo {
+use super::repository::interface::Crud;
+
+pub struct TodoDomain {
     id: i32,
     title: String,
     memo: Option<String>,
@@ -11,9 +13,9 @@ pub struct Todo {
     updated_at: NaiveDateTime,
 }
 
-impl Todo {
-    pub fn insert() -> Result<(), Error> {
-        Ok(())
+impl TodoDomain {
+    pub fn insert(repository: impl Crud, todo: RepositoryForCreate) -> Result<i32, Error> {
+        Ok(repository.insert(todo)?)
     }
 }
 
