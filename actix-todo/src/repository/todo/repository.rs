@@ -1,42 +1,29 @@
-use core::panic;
-
-use diesel::PgConnection;
-
+use crate::domain::repository::interface::Crud;
 use crate::error::types::Error;
-use crate::repository::diesel::connection as diesel_connection;
-use crate::utils;
+use crate::repository::diesel::schema::todos;
+use crate::repository::model::todo::RepositoryForCreate;
+use diesel::r2d2::ConnectionManager;
+use diesel::{prelude::*, PgConnection, QueryResult};
+use r2d2::PooledConnection;
 
-use crate::model::todo::{NewTodo, Todo, UpdateTodoRequest};
+use crate::model::todo::Todo;
 pub struct TodoRepository {
-    connection: PgConnection,
+    connection: PooledConnection<ConnectionManager<PgConnection>>,
 }
 
-impl TodoRepository {
-    pub fn new() -> Self {
-        let result = match utils::EnvFile::database_url() {
-            Ok(url) => diesel_connection::get_connection(url),
-            Err(e) => panic!("{}", e),
-        };
-        let connection = match result {
-            Ok(connection) => connection,
-            Err(e) => panic!("{}", e),
-        };
-
+impl Crud for TodoRepository {
+    fn new(connection: PooledConnection<ConnectionManager<PgConnection>>) -> Self {
         TodoRepository { connection }
     }
-    pub fn insert(&self, todo: NewTodo) -> Result<i32, Error> {
-        Todo::insert(&self.connection, todo)
-    }
-    pub fn gets(&self, offset: i64, limit: i64) -> Result<Vec<Todo>, Error> {
-        Todo::gets(&self.connection, offset, limit)
-    }
-    pub fn get(&self, id: i32) -> Result<Todo, Error> {
-        Todo::get(&self.connection, id)
-    }
-    pub fn update(&self, request: UpdateTodoRequest) -> Result<(), Error> {
-        Todo::update(&self.connection, request)
-    }
-    pub fn delete(&self, id: i32) -> Result<(), Error> {
-        Todo::delete(&self.connection, id)
+    fn insert(&self, todo: RepositoryForCreate) -> Result<i32, Error> {
+        let result = diesel::insert_into(todos::table)
+            .values(&todo)
+            .get_result::<Todo>(&self.connection) as QueryResult<Todo>;
+        match result {
+            Ok(row) => Ok(row.id),
+            Err(_) => Err(Error::DatabaseRuntimeError(
+                "データの登録に失敗しました。".to_string(),
+            )),
+        }
     }
 }

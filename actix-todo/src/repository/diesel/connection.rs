@@ -1,6 +1,14 @@
-use diesel::{pg::PgConnection, Connection};
+use diesel::{pg::PgConnection, r2d2::ConnectionManager, Connection};
 
-use crate::error::types::Error;
+use crate::{error::types::Error, utils};
+
+pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+
+pub fn establish_connection() -> Pool {
+    let database_url = utils::EnvFile::database_url().unwrap();
+    let manager = ConnectionManager::<PgConnection>::new(database_url);
+    r2d2::Pool::builder().build(manager).unwrap()
+}
 
 pub fn get_connection(database_url: String) -> Result<PgConnection, Error> {
     let result = PgConnection::establish(&database_url);
