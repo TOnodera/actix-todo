@@ -1,4 +1,3 @@
-use crate::domain::repository;
 use crate::domain::repository::interface::Crud;
 use crate::repository::diesel::connection::Pool;
 use crate::repository::model::todo::RepositoryForCreate;
