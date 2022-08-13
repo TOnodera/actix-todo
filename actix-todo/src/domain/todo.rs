@@ -13,6 +13,12 @@ pub struct TodoDomain {
     updated_at: NaiveDateTime,
 }
 
+pub struct NewTodoDomain {
+    pub title: String,
+    pub memo: Option<String>,
+    pub done: bool,
+}
+
 impl TodoDomain {
     pub fn insert(repository: impl Crud, todo: RepositoryForCreate) -> Result<i32, Error> {
         Ok(repository.insert(todo)?)

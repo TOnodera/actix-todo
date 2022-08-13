@@ -1,7 +1,5 @@
 use actix_web::web;
 
-use self::diesel::connection::Pool;
-
 pub mod diesel;
 pub mod model;
 pub mod todo;

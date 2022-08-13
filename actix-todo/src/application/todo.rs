@@ -3,25 +3,29 @@ use serde_json::json;
 
 use crate::{
     api::model::request::todo::RequestForCreate,
-    domain::{repository::interface::Crud, todo::TodoDomain},
-    repository::{
-        diesel::connection::Pool, model::todo::RepositoryForCreate,
-        todo::repository::TodoRepository,
-    },
+    domain::{repository::interface::Crud, service::todo::TodoDomainService, todo::NewTodoDomain},
+    repository::{diesel::connection::Pool, todo::repository::TodoRepository},
 };
 
-pub struct ApplicationService;
+pub struct TodoApplicationService;
 
-impl ApplicationService {
+impl TodoApplicationService {
     pub fn add_todo(
         state: web::Data<Pool>,
         request: web::Json<RequestForCreate>,
     ) -> Result<HttpResponse, actix_web::Error> {
-        let conn = state.get().unwrap();
+        let result = state.get();
+        let conn = match result {
+            Ok(conn) => conn,
+            Err(e) => {
+                return Err(error::ErrorInternalServerError(e));
+            }
+        };
+
         let repository = TodoRepository::new(conn);
-        let result = TodoDomain::insert(
+        let result = TodoDomainService::add_todo(
             repository,
-            RepositoryForCreate {
+            NewTodoDomain {
                 title: request.title.clone(),
                 memo: request.memo.clone(),
                 done: request.done,
@@ -30,6 +34,6 @@ impl ApplicationService {
 
         result
             .map(|id| HttpResponse::Created().json(json!({ "id": id })))
-            .map_err(|e| error::ErrorBadRequest(e))
+            .map_err(|e| error::ErrorInternalServerError(e))
     }
 }
