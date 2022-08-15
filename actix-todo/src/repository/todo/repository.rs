@@ -6,7 +6,7 @@ use diesel::r2d2::ConnectionManager;
 use diesel::{prelude::*, PgConnection, QueryResult};
 use r2d2::PooledConnection;
 
-use crate::model::todo::Todo;
+use crate::repository::model::todo::Todo;
 pub struct TodoRepository {
     connection: PooledConnection<ConnectionManager<PgConnection>>,
 }

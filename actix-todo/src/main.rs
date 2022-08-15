@@ -7,7 +7,6 @@ mod application;
 mod config;
 mod domain;
 mod error;
-mod model;
 mod repository;
 mod utils;
 
