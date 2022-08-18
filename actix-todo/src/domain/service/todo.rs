@@ -3,14 +3,14 @@ use crate::{
         repository::interface::Crud,
         todo::{NewTodoDomain, TodoDomain},
     },
-    error::types::Error,
+    error::types::AppError,
     repository::model::todo::RepositoryForCreate,
 };
 
 pub(crate) struct TodoDomainService;
 
 impl TodoDomainService {
-    pub fn add_todo(repository: impl Crud, todo: NewTodoDomain) -> Result<i32, Error> {
+    pub fn add_todo(repository: impl Crud, todo: NewTodoDomain) -> Result<i32, AppError> {
         let result = TodoDomain::insert(
             repository,
             RepositoryForCreate {
@@ -22,6 +22,6 @@ impl TodoDomainService {
 
         result
             .map(|id| id)
-            .map_err(|e| Error::DatabaseRuntimeError(e.to_string()))
+            .map_err(|e| AppError::DatabaseRuntimeError(e.to_string()))
     }
 }

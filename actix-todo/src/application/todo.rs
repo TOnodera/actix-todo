@@ -1,9 +1,10 @@
-use actix_web::{error, web, HttpResponse};
+use actix_web::{web, HttpResponse};
 use serde_json::json;
 
 use crate::{
     api::model::request::todo::RequestForCreate,
     domain::{repository::interface::Crud, service::todo::TodoDomainService, todo::NewTodoDomain},
+    error::types::AppError,
     repository::{diesel::connection::Pool, todo::repository::TodoRepository},
 };
 
@@ -13,14 +14,8 @@ impl TodoApplicationService {
     pub fn add_todo(
         state: web::Data<Pool>,
         request: web::Json<RequestForCreate>,
-    ) -> Result<HttpResponse, actix_web::Error> {
-        let result = state.get();
-        let conn = match result {
-            Ok(conn) => conn,
-            Err(e) => {
-                return Err(error::ErrorInternalServerError(e));
-            }
-        };
+    ) -> Result<HttpResponse, AppError> {
+        let conn = state.get()?;
 
         let repository = TodoRepository::new(conn);
         let result = TodoDomainService::add_todo(
@@ -32,8 +27,6 @@ impl TodoApplicationService {
             },
         );
 
-        result
-            .map(|id| HttpResponse::Created().json(json!({ "id": id })))
-            .map_err(|e| error::ErrorInternalServerError(e))
+        result.map(|id| HttpResponse::Created().json(json!({ "id": id })))
     }
 }

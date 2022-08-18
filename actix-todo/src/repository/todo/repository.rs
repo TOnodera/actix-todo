@@ -1,5 +1,5 @@
 use crate::domain::repository::interface::Crud;
-use crate::error::types::Error;
+use crate::error::types::AppError;
 use crate::repository::diesel::schema::todos;
 use crate::repository::model::todo::RepositoryForCreate;
 use diesel::r2d2::ConnectionManager;
@@ -15,13 +15,13 @@ impl Crud for TodoRepository {
     fn new(connection: PooledConnection<ConnectionManager<PgConnection>>) -> Self {
         TodoRepository { connection }
     }
-    fn insert(&self, todo: RepositoryForCreate) -> Result<i32, Error> {
+    fn insert(&self, todo: RepositoryForCreate) -> Result<i32, AppError> {
         let result = diesel::insert_into(todos::table)
             .values(&todo)
             .get_result::<Todo>(&self.connection) as QueryResult<Todo>;
         match result {
             Ok(row) => Ok(row.id),
-            Err(_) => Err(Error::DatabaseRuntimeError(
+            Err(_) => Err(AppError::DatabaseRuntimeError(
                 "データの登録に失敗しました。".to_string(),
             )),
         }
