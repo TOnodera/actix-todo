@@ -1,7 +1,7 @@
 use crate::domain::repository::interface::Crud;
 use crate::error::types::AppError;
 use crate::repository::diesel::schema::todos;
-use crate::repository::model::todo::RepositoryForCreate;
+use crate::repository::model::todo::ModelForCreate;
 use diesel::r2d2::ConnectionManager;
 use diesel::{prelude::*, PgConnection, QueryResult};
 use r2d2::PooledConnection;
@@ -15,7 +15,7 @@ impl Crud for TodoRepository {
     fn new(connection: PooledConnection<ConnectionManager<PgConnection>>) -> Self {
         TodoRepository { connection }
     }
-    fn insert(&self, todo: RepositoryForCreate) -> Result<i32, AppError> {
+    fn insert(&self, todo: ModelForCreate) -> Result<i32, AppError> {
         let result = diesel::insert_into(todos::table)
             .values(&todo)
             .get_result::<Todo>(&self.connection) as QueryResult<Todo>;

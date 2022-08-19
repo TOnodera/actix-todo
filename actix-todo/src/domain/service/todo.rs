@@ -4,7 +4,7 @@ use crate::{
         todo::{NewTodoDomain, TodoDomain},
     },
     error::types::AppError,
-    repository::model::todo::RepositoryForCreate,
+    repository::model::todo::ModelForCreate,
 };
 
 pub(crate) struct TodoDomainService;
@@ -13,7 +13,7 @@ impl TodoDomainService {
     pub fn add_todo(repository: impl Crud, todo: NewTodoDomain) -> Result<i32, AppError> {
         TodoDomain::insert(
             repository,
-            RepositoryForCreate {
+            ModelForCreate {
                 title: todo.title.clone(),
                 memo: todo.memo.clone(),
                 done: todo.done,
