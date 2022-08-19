@@ -10,7 +10,7 @@ use crate::{
 pub(crate) struct TodoDomainService;
 
 impl TodoDomainService {
-    pub fn add_todo(repository: impl Crud, todo: NewTodoDomain) -> Result<i32, AppError> {
+    pub fn add_todo(repository: impl Crud, todo: NewTodoDomain) -> Result<i32, AppError<'static>> {
         TodoDomain::insert(
             repository,
             ModelForCreate {

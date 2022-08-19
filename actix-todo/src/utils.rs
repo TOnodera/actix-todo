@@ -3,11 +3,11 @@ pub mod EnvFile {
 
     use crate::error::types::AppError;
 
-    pub fn database_url() -> Result<String, AppError> {
+    pub fn database_url() -> Result<String, AppError<'static>> {
         dotenv().ok();
         match std::env::var("DATABASE_URL") {
             Ok(url) => Ok(url),
-            Err(e) => Err(AppError::VarError(e.to_string())),
+            Err(e) => Err(AppError::VarError(e)),
         }
     }
 }

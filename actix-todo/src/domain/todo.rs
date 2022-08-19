@@ -20,11 +20,9 @@ pub struct NewTodoDomain {
 }
 
 impl TodoDomain {
-    pub fn insert(repository: impl Crud, todo: ModelForCreate) -> Result<i32, AppError> {
+    pub fn insert(repository: impl Crud, todo: ModelForCreate) -> Result<i32, AppError<'static>> {
         Ok(repository.insert(todo)?)
     }
-
-    pub fn update(repository: impl Crud, todo: RepositoryForUpdate) -> Result<(), AppError> {}
 }
 
 #[cfg(test)]

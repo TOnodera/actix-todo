@@ -1,16 +1,16 @@
-use actix_web::{http::StatusCode, HttpResponse};
+use actix_web::HttpResponse;
 use r2d2;
 use serde_json::json;
 use std::fmt::Display;
 #[derive(Debug)]
-pub enum AppError {
-    ConnectionError(String),
-    DatabaseRuntimeError(String),
-    VarError(String),
-    NotFoundError(String),
+pub enum AppError<'a> {
+    ConnectionError(&'a str),
+    DatabaseRuntimeError(&'a str),
+    VarError(&'a str),
+    NotFoundError(&'a str),
 }
 
-impl Display for AppError {
+impl<'a> Display for AppError<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AppError::ConnectionError(e) => {
@@ -30,7 +30,7 @@ impl Display for AppError {
 }
 
 // AppErrorのResponseエラーとしての対応づけ
-impl actix_web::error::ResponseError for AppError {
+impl<'a> actix_web::error::ResponseError for AppError<'a> {
     fn error_response(&self) -> actix_web::HttpResponse {
         match self {
             _ => HttpResponse::InternalServerError()
@@ -40,8 +40,8 @@ impl actix_web::error::ResponseError for AppError {
 }
 
 // r2d2エラーの変換
-impl From<r2d2::Error> for AppError {
+impl<'a> From<r2d2::Error> for AppError<'a> {
     fn from(_: r2d2::Error) -> Self {
-        AppError::ConnectionError("接続エラーが発生しました。".to_string())
+        AppError::ConnectionError("接続エラーが発生しました。")
     }
 }

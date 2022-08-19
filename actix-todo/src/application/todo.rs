@@ -14,7 +14,7 @@ impl TodoApplicationService {
     pub fn add_todo(
         state: web::Data<Pool>,
         request: web::Json<RequestForCreate>,
-    ) -> Result<HttpResponse, AppError> {
+    ) -> Result<HttpResponse, AppError<'static>> {
         let conn = state.get()?;
 
         let repository = TodoRepository::new(conn);
